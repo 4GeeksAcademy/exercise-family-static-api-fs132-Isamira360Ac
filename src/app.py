@@ -40,6 +40,42 @@ def handle_hello():
 
 
 # This only runs if `$ python src/app.py` is executed
+
+
+@app.route('/members/<int:member_id>', methods=['GET'])
+def get_single_member(member_id):
+    member=jackson_family.get_member(member_id)
+
+    if member is None:
+        return jsonify({"msg": "Miembro no existe"}),404
+    
+    return jsonify(member),200
+
+
+@app.route('/members', methods=['POST'])
+def add_member():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg":" No se proporcionaron datos" }),400
+    
+    if "first_name" not in data or "age" not in data or "lucky_numbers" not in data:
+        return jsonify({"msg":"Faltan algunos datos"}),400
+
+    new_member=jackson_family.add_member(data)
+    return jsonify (new_member),201
+
+@app.route('/members/<int:member_id>', methods=['DELETE'])
+def delete_member(member_id):
+    deleted= jackson_family.delete_member(member_id)
+
+    if not deleted:
+        return jsonify({"msg":"Member not found"}), 404
+    
+    return jsonify({"done": True}),200
+
+
+
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=True)
